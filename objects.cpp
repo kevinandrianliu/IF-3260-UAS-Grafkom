@@ -49,6 +49,8 @@ void CannonBullet::render(char* fbp, struct fb_var_screeninfo vinfo, struct fb_f
     bresenham(x+7, y  , x  , y+7,true,fbp,vinfo,finfo);
     bresenham(x  , y+7, x-7, y  ,true,fbp,vinfo,finfo);
 
+	rasterScan(x-7, y-7, x+7, y+7, 1, fbp, vinfo, finfo);
+
     offset++;
 };
 bool CannonBullet::checkIfShot(class Plane& plane){
@@ -98,11 +100,13 @@ PlaneBullet::PlaneBullet(int x, int y, int x_origin, int y_origin) : Renderable(
 };
 PlaneBullet::~PlaneBullet() { };
 
-void PlaneBullet::move(class Cannon& cannon){
-    int new_x_pos = this->getX() + 1;
+void PlaneBullet::move(){
+//void PlaneBullet::move(class Cannon& cannon){
+    //int new_x_pos = this->getX() + 1;
 
-    this->setX(new_x_pos);
-    this->setY(equation(cannon,new_x_pos));
+    //this->setX(new_x_pos);
+    this->setY(this->getY()+ 1);
+    //this->setY(equation(cannon,new_x_pos));
 };
 void PlaneBullet::render(char* fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo){
     int x = this->getX();
@@ -112,6 +116,7 @@ void PlaneBullet::render(char* fbp, struct fb_var_screeninfo vinfo, struct fb_fi
     bresenham(x  , y-7, x+7, y  ,true,fbp,vinfo,finfo);
     bresenham(x+7, y  , x  , y+7,true,fbp,vinfo,finfo);
     bresenham(x  , y+7, x-7, y  ,true,fbp,vinfo,finfo);
+	rasterScan(x-7, y-7, x+7, y+7, false, fbp, vinfo, finfo);
 };
 bool PlaneBullet::checkIfCollide(class Cannon& cannon){
     int x_min = cannon.getX() - cannon.getRadius();
@@ -127,13 +132,13 @@ bool PlaneBullet::checkIfCollide(class Cannon& cannon){
     }
     return false;
 };
-
+/*
 int PlaneBullet::equation(class Cannon& cannon, int x){
     int cannon_x_pos = cannon.getX();
     int cannon_y_pos = cannon.getY();
 
     return ((x * (cannon_y_pos - y_origin) - x_origin * cannon_y_pos + y_origin * cannon_x_pos) / (cannon_x_pos - x_origin));
-};
+};*/
 
 
 // ******** Plane Class Implementation ********
@@ -159,6 +164,7 @@ void Plane::move(struct fb_var_screeninfo vinfo){
 void Plane::render(char* fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo){
     int x0 = this->getX() + offset;
     int y0 = this->getY();
+/*
     int x1 = x0 + 50;
     int y1 = y0;
 
@@ -174,6 +180,37 @@ void Plane::render(char* fbp, struct fb_var_screeninfo vinfo, struct fb_fix_scre
     bresenham(x0+40, y0+15, x1-50, y1+41,false,fbp,vinfo,finfo);//sayap
     bresenham(x0   , y0   , x1-80, y1-15,false,fbp,vinfo,finfo);//ekor
     bresenham(x0-10, y0+25, x1-80, y1-15,false,fbp,vinfo,finfo);//ekor
+*/
+
+	bresenham(x0, y0, x0 + 15, y0,false,fbp,vinfo,finfo);
+	bresenham(x0 + 15, y0, x0+21, y0-6, false,fbp,vinfo,finfo);
+	bresenham(x0+21, y0-6, x0+41, y0-6, false,fbp,vinfo,finfo);
+	bresenham(x0+41, y0-6, x0+41, y0, false,fbp,vinfo,finfo);
+	bresenham(x0+41, y0, x0+50, y0, false,fbp,vinfo,finfo);
+    bresenham(x0+50, y0, x0 + 50, y0+20,false,fbp,vinfo,finfo);
+    bresenham(x0+50, y0+20,x0+41, y0+30,false,fbp,vinfo,finfo);
+	bresenham(x0+25, y0+30, x0+41, y0+30,false,fbp,vinfo,finfo);
+	bresenham(x0+25, y0+30, x0+20, y0+36,false,fbp,vinfo,finfo);
+	bresenham(x0, y0+36, x0+20, y0+36,false,fbp,vinfo,finfo);
+	bresenham(x0, y0+30, x0, y0+36,false,fbp,vinfo,finfo);
+	bresenham(x0, y0+30, x0-9, y0+30,false,fbp,vinfo,finfo);
+    bresenham(x0-9, y0+10, x0-9, y0+30,false,fbp,vinfo,finfo);
+    bresenham(x0, y0, x0-9, y0+10,false,fbp,vinfo,finfo);
+    
+	rasterScan(x0-9, y0-6, x0+50, y0+36, 1,fbp,vinfo,finfo);
+	bresenham(x0, y0+30, x0+5, y0+24,false,fbp,vinfo,finfo);
+	bresenham(x0+25, y0+24, x0+5, y0+24,false,fbp,vinfo,finfo);
+	bresenham(x0+25, y0+24, x0+25, y0+30,false,fbp,vinfo,finfo);
+	bresenham(x0+35, y0, x0+41, y0-6,false,fbp,vinfo,finfo);
+
+	bresenham(x0+41, y0+10, x0+50, y0,false,fbp,vinfo,finfo);
+	bresenham(x0+41, y0+10, x0-9, y0+10,false,fbp,vinfo,finfo);
+	bresenham(x0+41, y0+10, x0+41, y0+30,false,fbp,vinfo,finfo);
+	
+	bresenham(x0+20, y0+30, x0+25, y0+24,false,fbp,vinfo,finfo);
+	bresenham(x0+20, y0+30, x0+20, y0+36,false,fbp,vinfo,finfo);
+	bresenham(x0+20, y0+30, x0, y0+30,false,fbp,vinfo,finfo);
+
 };
 // ******** PlanePiece Class Implementation ********
 PlanePiece::PlanePiece(int x, int y, int offset) : Plane(x,y,offset) { };

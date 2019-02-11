@@ -59,6 +59,14 @@ void clear_screen(char * framebuffer, unsigned int x_size, unsigned int y_size, 
     }
 }
 
+void draw_life(int life, char colorful, char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo) {
+	bresenham(10, 10, 10, 20, false,fbp,vinfo,finfo);
+	bresenham(10, 10, 10+30*life, 10, false,fbp,vinfo,finfo);
+	bresenham(10, 20, 10+30*life, 20, false,fbp,vinfo,finfo);
+	bresenham(10+30*life, 10, 10+30*life, 20, false,fbp,vinfo,finfo);
+	rasterScan(10, 10, 10+30*life, 20, colorful, fbp, vinfo, finfo);
+}
+
 int main(int argc, char** argv){
     int fbfd;
     struct fb_var_screeninfo vinfo;
@@ -92,7 +100,7 @@ int main(int argc, char** argv){
         exit(4);
     }
 
-    const char *dev = "/dev/input/event4";
+    const char *dev = "/dev/input/event2";
     int fd = open(dev, O_RDONLY);
     if (fd == -1) {
         fprintf(stderr, "Cannot open %s: %s.\n", dev, strerror(errno));
@@ -113,19 +121,25 @@ int main(int argc, char** argv){
     struct timespec delay;      // delay variable
     delay.tv_sec = 0;
     delay.tv_nsec = 10000000;
+	int life = 2;
 
     bool plane_shot_flag = false;
-    while(1){
+	int cannonShot = 0;
+
+	while (life > 0) {
+
         if (plane_bullet_object == nullptr){
             if (rand() % 100 == 4){
                 plane_bullet_object = new PlaneBullet(plane_object->getX() + plane_object->getOffset(),plane_object->getY(), plane_object->getX() + plane_object->getOffset(), plane_object->getY());
             }
         } else {
-            plane_bullet_object->move(*cannon_object);
-            plane_bullet_object->render(fbp,vinfo,finfo);
+			//plane_bullet_object->move(*cannon_object);
+			plane_bullet_object->move();
+		    plane_bullet_object->render(fbp,vinfo,finfo);
         }
 
-        clear_screen(fbp,1366,762,vinfo,finfo);
+        clear_screen(fbp,800,600,vinfo,finfo);
+		draw_life(life, 0, fbp,vinfo,finfo);
 
         // **** Cannon Object Handling ****
         cannon_object->render(fbp,vinfo,finfo);
@@ -171,8 +185,15 @@ int main(int argc, char** argv){
             }
 
             // *** PlaneBullet Object Handling
-            if ((plane_bullet_object != nullptr) && plane_bullet_object->checkIfCollide(*cannon_object)){
-                break;
+            if (plane_bullet_object != nullptr) {
+				if (plane_bullet_object->checkIfCollide(*cannon_object)){
+					life--;
+					delete plane_bullet_object;
+					plane_bullet_object = nullptr;
+				} else if (plane_bullet_object->getY() > 500) {
+					delete plane_bullet_object;
+					plane_bullet_object = nullptr;
+				}
             }
         } else {
             int blast_size = 1;
@@ -188,7 +209,7 @@ int main(int argc, char** argv){
 
             PlanePiece *(plane_piece_object) = new PlanePiece(70,100,plane_object->getOffset());
             while (plane_piece_object->getY() < 500){
-                clear_screen(fbp,1366,762,vinfo,finfo);
+                clear_screen(fbp,800,600,vinfo,finfo);
 
                 cannon_object->render(fbp,vinfo,finfo);
 
@@ -205,6 +226,7 @@ int main(int argc, char** argv){
         // Delay needed to make flawless drawing
         nanosleep(&delay,NULL);
     }
+
     delete plane_object;
     delete cannon_object;
 

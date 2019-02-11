@@ -188,3 +188,62 @@ void pixel_color(char *fbp, long int location, int b, int g, int r){
     *(fbp + location + 2) = r;     // red
     *(fbp + location + 3) = 0;
 }
+
+char checkPixelAround(int x, int y, char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo){
+    long int mem_location;
+    int max_x;
+
+    char pixel_up = false;
+    char pixel_down = false;
+
+    for (int i = x-1; i < x + 2; i++){
+        if (!(pixel_up)){
+            mem_location = (i + vinfo.xoffset) * (vinfo.bits_per_pixel/8) + (y - 1 + vinfo.yoffset) * finfo.line_length;
+            if ((*(fbp + mem_location) || *(fbp + mem_location + 1) || *(fbp + mem_location + 2)) > 0x00){
+                pixel_up = true;
+            }
+        }
+        if (!(pixel_down)){
+            mem_location = (i + vinfo.xoffset) * (vinfo.bits_per_pixel/8) + (y + 1 + vinfo.yoffset) * finfo.line_length;
+            if ((*(fbp + mem_location) || *(fbp + mem_location + 1) || *(fbp + mem_location + 2)) > 0x00){
+                pixel_down = true;
+            }
+        }
+    }
+
+    return (pixel_up && pixel_down);
+}
+
+void rasterScan(int x_min, int y_min, int x_max, int y_max, char colorful, char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo){
+	char fill_flag = 0;  // 0 = Don't fill, 1 = Fill
+    long int mem_location;
+
+    // Assumes x is not filled from the top or bottom of screen
+    for (int j = y_min; j <= y_max; j++){
+        for (int i = x_min; i <= x_max; i++){
+            mem_location = (i + vinfo.xoffset) * (vinfo.bits_per_pixel/8) + (j + vinfo.yoffset) * finfo.line_length;
+
+            if ((*(fbp + mem_location) || *(fbp + mem_location + 1) || *(fbp + mem_location + 2)) == 0x00){
+                if (fill_flag){
+                    if (colorful){
+                        pixel_color(fbp,mem_location,(i % 255),(j % 255), ((j-i) % 255));
+                    } else {
+                        pixel_color(fbp,mem_location,255,255,255);
+                    }
+                }
+            } else {
+                if (checkPixelAround(i, j, fbp, vinfo, finfo)){
+                    if (fill_flag) {
+                        if (colorful){
+                            pixel_color(fbp,mem_location,(i % 255),(j % 255), ((j-i) % 255));
+                        } else {
+                            pixel_color(fbp,mem_location,255,255,255);
+                        }
+                    }
+
+                    fill_flag = !(fill_flag);
+                }
+            }
+        }
+    }
+}

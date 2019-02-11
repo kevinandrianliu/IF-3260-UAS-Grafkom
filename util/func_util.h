@@ -13,4 +13,6 @@ void drawCircle(int xc, int yc, int x, int y, char * framebuffer, struct fb_var_
 void halfcircleBres(int xc, int yc, int r, char * framebuffer, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo);
 
 void pixel_color(char *fbp, long int location, int b, int g, int r);
+char checkPixelAround(int x, int y, char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo);
+void rasterScan(int x_min, int y_min, int x_max, int y_max, char colorful, char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo);
 #endif
