@@ -211,11 +211,13 @@ int main(int argc, char** argv){
             while (plane_piece_object->getY() < 500){
                 clear_screen(fbp,800,600,vinfo,finfo);
 
-                cannon_object->render(fbp,vinfo,finfo);
-
                 plane_piece_object->render(fbp,vinfo,finfo);
                 plane_piece_object->setY(plane_piece_object->getY() + 1);
+
+                cannon_object->render(fbp,vinfo,finfo);
+
                 nanosleep(&delay,NULL);
+
             };
 
             delete plane_piece_object;
