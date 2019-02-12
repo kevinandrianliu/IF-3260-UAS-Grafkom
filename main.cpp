@@ -13,7 +13,11 @@
 #include <cstring>
 
 #include "util/func_util.h"
-#include "objects.h"
+#include "object/CannonBullet.h"
+#include "object/PlaneBullet.h"
+#include "object/Blast.h"
+#include "object/Plane.h"
+#include "object/Cannon.h"
 
 using namespace std;
 
@@ -60,11 +64,14 @@ void clear_screen(char * framebuffer, unsigned int x_size, unsigned int y_size, 
 }
 
 void draw_life(int life, char colorful, char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo) {
-	bresenham(10, 10, 10, 20, false,fbp,vinfo,finfo);
-	bresenham(10, 10, 10+30*life, 10, false,fbp,vinfo,finfo);
-	bresenham(10, 20, 10+30*life, 20, false,fbp,vinfo,finfo);
-	bresenham(10+30*life, 10, 10+30*life, 20, false,fbp,vinfo,finfo);
-	rasterScan(10, 10, 10+30*life, 20, colorful, fbp, vinfo, finfo);
+	int x_offset = 20;
+	int y_offset = 20;
+	bresenham(x_offset, y_offset,    x_offset,        y_offset+10, false,fbp,vinfo,finfo);
+	bresenham(x_offset, y_offset,    x_offset+30*life, y_offset, false,fbp,vinfo,finfo);
+	bresenham(x_offset, y_offset+10, x_offset+30*life, y_offset+10, false,fbp,vinfo,finfo);
+	bresenham(x_offset+30*life, y_offset, x_offset+30*life, y_offset+10, false,fbp,vinfo,finfo);
+
+	rasterScan(x_offset, y_offset, x_offset+30*life, y_offset+10, colorful, fbp, vinfo, finfo);
 }
 
 int main(int argc, char** argv){
