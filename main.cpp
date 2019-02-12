@@ -123,8 +123,10 @@ int main(int argc, char** argv){
 
     // **** Declares all variable needed for drawing framebuffer ****
     vector<CannonBullet *> bullets_vector_list;   // std::vector to store all bullets fired
+
     Plane *(plane_object) = new Plane(40,100,0);           // plane object
     Cannon *(cannon_object) = new Cannon(400,530,80,turret_selection);
+
     PlaneBullet *(plane_bullet_object) = nullptr;
 
     // **** Uses to determine whether to shoot a bullet from plane
@@ -136,13 +138,32 @@ int main(int argc, char** argv){
 	int life = 2;
 
     bool plane_shot_flag = false;
-	int cannonShot = 0;
-
+    int cannonShot = 0;
+	int times;
+	int max_times = 50;
 	while (life > 0) {
         if (plane_bullet_object == nullptr){
             if (rand() % 100 == 4){
-                plane_bullet_object = new PlaneBullet(plane_object->getX() + plane_object->getOffset(),plane_object->getY(), plane_object->getX() + plane_object->getOffset(), plane_object->getY());
-            }
+				for(times = 0; times <= max_times; times++){
+					clear_screen(fbp,800,600,vinfo,finfo);
+					cannon_object->render(fbp,vinfo,finfo);
+					draw_life(life, 0, fbp,vinfo,finfo);
+				
+					plane_object->moveDown(vinfo);
+					plane_object->render(fbp,vinfo,finfo);
+					nanosleep(&delay,NULL);
+				}
+                plane_bullet_object = new PlaneBullet(plane_object->getX() + plane_object->getOffsetX(),plane_object->getY(), plane_object->getX() + plane_object->getOffsetX(), plane_object->getY());
+				for(times = 0; times <= max_times; times++){
+					clear_screen(fbp,800,600,vinfo,finfo);
+					cannon_object->render(fbp,vinfo,finfo);
+					draw_life(life, 0, fbp,vinfo,finfo);
+
+					plane_object->moveUp(vinfo);
+					plane_object->render(fbp,vinfo,finfo);
+					nanosleep(&delay,NULL);
+				}            
+			}
         } else {
 			//plane_bullet_object->move(*cannon_object);
 			plane_bullet_object->move();
@@ -211,7 +232,7 @@ int main(int argc, char** argv){
             }
         } else {
             int blast_size = 1;
-            Blast *(blast_object) = new Blast(60 + plane_object->getOffset(), 100, blast_size);
+            Blast *(blast_object) = new Blast(60 + plane_object->getOffsetX(), 100, blast_size);
 
             while (blast_size < 51){
                 blast_object->render(fbp,vinfo,finfo);
@@ -221,7 +242,7 @@ int main(int argc, char** argv){
             }
             delete blast_object;
 
-            PlanePiece *(plane_piece_object) = new PlanePiece(70,100,plane_object->getOffset());
+            PlanePiece *(plane_piece_object) = new PlanePiece(70,100,plane_object->getOffsetX(), plane_object->getOffsetY());
             while (plane_piece_object->getY() < 500){
                 clear_screen(fbp,800,600,vinfo,finfo);
 

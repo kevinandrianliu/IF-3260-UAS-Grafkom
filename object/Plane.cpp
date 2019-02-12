@@ -1,37 +1,79 @@
 #include "Plane.h"
 
 // ******** Plane Class Implementation ********
-Plane::Plane(int x, int y, int offset) : Renderable(x,y){
-    this->offset = offset;
+Plane::Plane(int x, int y, int offset_x, int offset_y) : Renderable(x,y){
+    this->offset_x = offset_x;
+	this->offset_y = offset_y;
 	way = 1;
 };
 Plane::~Plane() { };
 
-int Plane::getOffset(){
-    return offset;
+int Plane::getOffsetX(){
+    return offset_x;
 };
-void Plane::setOffset(int offset){
-    this->offset = offset;
+void Plane::setOffsetX(int offset_x){
+    this->offset_x = offset_x;
+};
+int Plane::getOffsetY(){
+    return offset_y;
+};
+void Plane::setOffsetY(int offset_y){
+    this->offset_y = offset_y;
 };
 
 void Plane::move(struct fb_var_screeninfo vinfo){
 	if (way) {
-    	offset++;
-		if (offset > vinfo.xres - 100){
-        	offset--;
+    	offset_x++;
+		if (offset_x > vinfo.xres - 100){
+        	offset_x--;
 			way = 0;
 	    }
 	} else {
-		offset--;
-		if (offset < 0){
-        	offset++;
+		offset_x--;
+		if (offset_x < 0){
+        	offset_x++;
 			way = 1;
 	    }
 	}
 };
+
+void Plane::moveUp(struct fb_var_screeninfo vinfo){
+	offset_y-=1;
+	if (way) {
+    	offset_x++;
+		if (offset_x > vinfo.xres - 100){
+        	offset_x--;
+			way = 0;
+	    }
+	} else {
+		offset_x--;
+		if (offset_x < 0){
+        	offset_x++;
+			way = 1;
+	    }
+	}
+};
+
+void Plane::moveDown(struct fb_var_screeninfo vinfo){
+	offset_y+=1;
+	if (way) {
+    	offset_x++;
+		if (offset_x > vinfo.xres - 100){
+        	offset_x--;
+			way = 0;
+	    }
+	} else {
+		offset_x--;
+		if (offset_x < 0){
+        	offset_x++;
+			way = 1;
+	    }
+	}
+};
+
 void Plane::render(char* fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo){
-    int x0 = this->getX() + offset;
-    int y0 = this->getY();
+    int x0 = this->getX() + offset_x;
+    int y0 = this->getY() + offset_y;
 
 	bresenham(x0, y0, x0 + 15, y0,false,fbp,vinfo,finfo);
 	bresenham(x0 + 15, y0, x0+21, y0-6, false,fbp,vinfo,finfo);
@@ -65,12 +107,12 @@ void Plane::render(char* fbp, struct fb_var_screeninfo vinfo, struct fb_fix_scre
 
 };
 // ******** PlanePiece Class Implementation ********
-PlanePiece::PlanePiece(int x, int y, int offset) : Plane(x,y,offset) { };
+PlanePiece::PlanePiece(int x, int y, int offset_x, int offset_y) : Plane(x,y,offset_x,offset_y) { };
 PlanePiece::~PlanePiece() { };
 
 void PlanePiece::render(char* fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo){
-    int x0 = this->getX() + this->getOffset();
-    int y0 = this->getY();
+    int x0 = this->getX() + this->getOffsetX();
+    int y0 = this->getY() + this->getOffsetY();
 
 
     int x1 = x0 + 50;
