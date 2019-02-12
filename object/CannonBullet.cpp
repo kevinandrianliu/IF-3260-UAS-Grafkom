@@ -80,9 +80,9 @@ bool CannonBullet::checkIfShot(class Plane& plane){
     int bullet_x_min = x - 7;
     int bullet_y_min = y - 7;
 
-    int plane_x_max = plane.getX() + plane.getOffset() + 50 + 25;
-    int plane_x_min = plane.getX() + plane.getOffset() + 50 - 80;
-    int plane_y_max = plane.getY() + 41;
+    int plane_x_max = plane.getX() + plane.getOffsetX() + 50 + 25;
+    int plane_x_min = plane.getX() + plane.getOffsetX() + 50 - 80;
+    int plane_y_max = plane.getY() + plane.getOffsetY() + 41;
 
     if ((bullet_x_max <= plane_x_max) && (bullet_x_max >= plane_x_min) && (bullet_y_min <= plane_y_max)){
         return true;

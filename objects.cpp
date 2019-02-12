@@ -81,8 +81,8 @@ bool CannonBullet::checkIfShot(class Plane& plane){
     int bullet_x_min = x - 7;
     int bullet_y_min = y - 7;
 
-    int plane_x_max = plane.getX() + plane.getOffset() + 50 + 25;
-    int plane_x_min = plane.getX() + plane.getOffset() + 50 - 80;
+    int plane_x_max = plane.getX() + plane.getOffsetX() + 50 + 25;
+    int plane_x_min = plane.getX() + plane.getOffsetX() + 50 - 80;
     int plane_y_max = plane.getY() + 41;
 
     if ((bullet_x_max <= plane_x_max) && (bullet_x_max >= plane_x_min) && (bullet_y_min <= plane_y_max)){
@@ -142,27 +142,53 @@ int PlaneBullet::equation(class Cannon& cannon, int x){
 
 
 // ******** Plane Class Implementation ********
-Plane::Plane(int x, int y, int offset) : Renderable(x,y){
-    this->offset = offset;
+Plane::Plane(int x, int y, int offset_x, int offset_y) : Renderable(x,y){
+    this->offset_x = offset_x;
+	this->offset_y = offset_y;
 };
 Plane::~Plane() { };
 
-int Plane::getOffset(){
-    return offset;
+int Plane::getOffsetX(){
+    return offset_x;
 };
-void Plane::setOffset(int offset){
-    this->offset = offset;
+void Plane::setOffsetX(int offset_x){
+    this->offset_x = offset_x;
+};
+int Plane::getOffsetY(){
+    return offset_y;
+};
+void Plane::setOffsetY(int offset_y){
+    this->offset_y = offset_y;
 };
 
 void Plane::move(struct fb_var_screeninfo vinfo){
-    offset++;
+    offset_x++;
 
-    if (offset > vinfo.xres + 25){
-        offset %= vinfo.xres;
+    if (offset_x > vinfo.xres + 25){
+        offset_x %= vinfo.xres;
     }
 };
+
+void Plane::moveUp(struct fb_var_screeninfo vinfo){
+    offset_x++;
+	offset_y--;
+
+    if (offset_x > vinfo.xres + 25){
+        offset_x %= vinfo.xres;
+    }
+};
+
+void Plane::moveDown(struct fb_var_screeninfo vinfo){
+    offset_x++;
+	offset_y++;
+
+    if (offset_x > vinfo.xres + 25){
+        offset_x %= vinfo.xres;
+    }
+};
+
 void Plane::render(char* fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo){
-    int x0 = this->getX() + offset;
+    int x0 = this->getX() + offset_x;
     int y0 = this->getY();
 /*
     int x1 = x0 + 50;
@@ -214,12 +240,12 @@ void Plane::render(char* fbp, struct fb_var_screeninfo vinfo, struct fb_fix_scre
 
 };
 // ******** PlanePiece Class Implementation ********
-PlanePiece::PlanePiece(int x, int y, int offset) : Plane(x,y,offset) { };
+PlanePiece::PlanePiece(int x, int y, int offset_x, int offset_y) : Plane(x,y, offset_x, offset_y) { };
 PlanePiece::~PlanePiece() { };
 
 void PlanePiece::render(char* fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo){
-    int x0 = this->getX() + this->getOffset();
-    int y0 = this->getY();
+    int x0 = this->getX() + this->getOffsetX();
+    int y0 = this->getY() + this->getOffsetY();
 
 
     int x1 = x0 + 50;
