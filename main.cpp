@@ -13,6 +13,7 @@
 #include <cstring>
 
 #include "util/func_util.h"
+#include "util/name.h"
 #include "object/CannonBullet.h"
 #include "object/PlaneBullet.h"
 #include "object/Blast.h"
@@ -112,7 +113,7 @@ int main(int argc, char** argv){
         exit(4);
     }
 
-    const char *dev = "/dev/input/event4";
+    const char *dev = "/dev/input/event2";
     int fd = open(dev, O_RDONLY);
     if (fd == -1) {
         fprintf(stderr, "Cannot open %s: %s.\n", dev, strerror(errno));
@@ -124,7 +125,7 @@ int main(int argc, char** argv){
     // **** Declares all variable needed for drawing framebuffer ****
     vector<CannonBullet *> bullets_vector_list;   // std::vector to store all bullets fired
 
-    Plane *(plane_object) = new Plane(40,100,0);           // plane object
+    Plane *(plane_object) = new Plane(40,100,0, 0);           // plane object
     Cannon *(cannon_object) = new Cannon(400,530,80,turret_selection);
 
     PlaneBullet *(plane_bullet_object) = nullptr;
@@ -269,6 +270,35 @@ int main(int argc, char** argv){
 
     while (bullets_vector_list.size() > 0){
         bullets_vector_list.erase(bullets_vector_list.begin());
+    }
+
+	int vertical_offset = 600;
+    delay.tv_nsec = 50000000;
+
+    for (;;){
+        clear_screen(fbp,800,600,vinfo,finfo);
+        if ((vertical_offset>=0) && (vertical_offset<600))
+            nama(vertical_offset,fbp, vinfo, finfo);
+        if ((vertical_offset+50>=0) && (vertical_offset+50<600))
+            bella(vertical_offset+50, fbp, vinfo, finfo);
+        if ((vertical_offset+100>=0) && (vertical_offset+100<600))
+            yora(vertical_offset+100,fbp,vinfo, finfo);
+        if ((vertical_offset+150>=0) && (vertical_offset+150<600))
+            kevin_a(vertical_offset+150, fbp, vinfo, finfo);
+        if ((vertical_offset+200>=0) && (vertical_offset+200<600))
+            kevin_f(vertical_offset+200, fbp, vinfo, finfo);
+        if ((vertical_offset+250>=0) && (vertical_offset+250<600))
+            tere(vertical_offset+250, fbp, vinfo, finfo);
+        if ((vertical_offset+300>=0) && (vertical_offset+300<600))
+            fildah(vertical_offset+300, fbp, vinfo, finfo);
+        if ((vertical_offset+350>=0) && (vertical_offset+350<600))
+            richard(vertical_offset+350, fbp, vinfo, finfo);
+
+        vertical_offset -= 3;
+        nanosleep(&delay,NULL);
+
+        if (vertical_offset < -400)
+            break;
     }
 
     munmap(fbp, screensize);
