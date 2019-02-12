@@ -22,7 +22,7 @@
 using namespace std;
 
 bool flagShoot = false;
-unsigned short bullet_selection;
+char turret_selection = 2;
 
 void userInput(int fd){
     ssize_t n;
@@ -40,9 +40,14 @@ void userInput(int fd){
             break;
         }
         if (ev.type == EV_KEY && ev.value >= 0 && ev.value <= 2){
-            if((ev.value == 1) && (!(flagShoot)) && (ev.code > 1) && (ev.code < 7)){
-                flagShoot = true;
-                bullet_selection = ev.code;
+            if ((ev.value == 1) && (!(flagShoot))){
+                if ((ev.code  == KEY_LEFT) && (turret_selection > 0)){
+                    turret_selection--;
+                } else if ((ev.code == KEY_RIGHT) && (turret_selection < 4)){
+                    turret_selection++;
+                } else if ((ev.code == KEY_Z)) {
+                    flagShoot = true;
+                }
             }
         }
     }
@@ -107,7 +112,7 @@ int main(int argc, char** argv){
         exit(4);
     }
 
-    const char *dev = "/dev/input/event2";
+    const char *dev = "/dev/input/event4";
     int fd = open(dev, O_RDONLY);
     if (fd == -1) {
         fprintf(stderr, "Cannot open %s: %s.\n", dev, strerror(errno));
@@ -119,7 +124,7 @@ int main(int argc, char** argv){
     // **** Declares all variable needed for drawing framebuffer ****
     vector<CannonBullet *> bullets_vector_list;   // std::vector to store all bullets fired
     Plane *(plane_object) = new Plane(40,100,0);           // plane object
-    Cannon *(cannon_object) = new Cannon(400,530,80);
+    Cannon *(cannon_object) = new Cannon(400,530,80,turret_selection);
     PlaneBullet *(plane_bullet_object) = nullptr;
 
     // **** Uses to determine whether to shoot a bullet from plane
@@ -134,7 +139,6 @@ int main(int argc, char** argv){
 	int cannonShot = 0;
 
 	while (life > 0) {
-
         if (plane_bullet_object == nullptr){
             if (rand() % 100 == 4){
                 plane_bullet_object = new PlaneBullet(plane_object->getX() + plane_object->getOffset(),plane_object->getY(), plane_object->getX() + plane_object->getOffset(), plane_object->getY());
@@ -149,6 +153,9 @@ int main(int argc, char** argv){
 		draw_life(life, 0, fbp,vinfo,finfo);
 
         // **** Cannon Object Handling ****
+        if (turret_selection != cannon_object->getTurretSelection()){
+            cannon_object->setTurretSelection(turret_selection);
+        }
         cannon_object->render(fbp,vinfo,finfo);
 
         if (not(plane_shot_flag)){
@@ -171,21 +178,21 @@ int main(int argc, char** argv){
                 }
             }
             if (flagShoot){
-                switch(bullet_selection-2){
+                switch(turret_selection){
                     case 0:
-                        bullets_vector_list.push_back(new CannonBullet(302,456,bullet_selection-2));
+                        bullets_vector_list.push_back(new CannonBullet(302,456,turret_selection));
                         break;
                     case 1:
-                        bullets_vector_list.push_back(new CannonBullet(344,427,bullet_selection-2));
+                        bullets_vector_list.push_back(new CannonBullet(344,427,turret_selection));
                         break;
                     case 2:
-                        bullets_vector_list.push_back(new CannonBullet(400,415,bullet_selection-2));
+                        bullets_vector_list.push_back(new CannonBullet(400,415,turret_selection));
                         break;
                     case 3:
-                        bullets_vector_list.push_back(new CannonBullet(455,427,bullet_selection-2));
+                        bullets_vector_list.push_back(new CannonBullet(455,427,turret_selection));
                         break;
                     case 4:
-                        bullets_vector_list.push_back(new CannonBullet(498,460,bullet_selection-2));
+                        bullets_vector_list.push_back(new CannonBullet(498,460,turret_selection));
                         break;
                 }
                 flagShoot = false;
