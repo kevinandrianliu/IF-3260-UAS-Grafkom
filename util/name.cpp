@@ -944,11 +944,15 @@ void render_w(int x, int y, int b, int g, int r, char *fbp, struct fb_var_screen
 
     for (j=0; j<16; j++) {
         for (i = 0; i < 4; i++) {
+			if (j + y >= vinfo.yres)
+		        break;
             location = (x+i+vinfo.xoffset) * (vinfo.bits_per_pixel/8) +
                                (y+j+vinfo.yoffset) * finfo.line_length;
         pixel_color(fbp, location, b, g, r);
         }
         for (i = 16; i < 20; i++) {
+			if (j + y >= vinfo.yres)
+		        break;
             location = (x+i+vinfo.xoffset) * (vinfo.bits_per_pixel/8) +
                                (y+j+vinfo.yoffset) * finfo.line_length;
         pixel_color(fbp, location, b, g, r);
@@ -956,6 +960,8 @@ void render_w(int x, int y, int b, int g, int r, char *fbp, struct fb_var_screen
     }
     for (j = 8; j < 16; j++) {
         for (i = 8; i < 12; i++) {
+			if (j + y >= vinfo.yres)
+		        break;
             location = (x+i+vinfo.xoffset) * (vinfo.bits_per_pixel/8) +
                                (y+j+vinfo.yoffset) * finfo.line_length;
         pixel_color(fbp, location, b, g, r);
@@ -963,6 +969,8 @@ void render_w(int x, int y, int b, int g, int r, char *fbp, struct fb_var_screen
     }
     for (j = 16; j < 20; j++) {
         for (i = 4; i < 8; i++) {
+			if (j + y >= vinfo.yres)
+		        break;
             location = (x+i+vinfo.xoffset) * (vinfo.bits_per_pixel/8) +
                                (y+j+vinfo.yoffset) * finfo.line_length;
         pixel_color(fbp, location, b, g, r);
@@ -970,6 +978,8 @@ void render_w(int x, int y, int b, int g, int r, char *fbp, struct fb_var_screen
     }
     for (j = 16; j < 20; j++) {
         for (i = 12; i < 16; i++) {
+			if (j + y >= vinfo.yres)
+		        break;
             location = (x+i+vinfo.xoffset) * (vinfo.bits_per_pixel/8) +
                                (y+j+vinfo.yoffset) * finfo.line_length;
         pixel_color(fbp, location, b, g, r);
@@ -1279,7 +1289,7 @@ void richard(int y, char *fbp, struct fb_var_screeninfo vinfo, struct fb_fix_scr
     render_t(106+200, y, b, g, r, fbp, vinfo, finfo);
     render_h(106+215, y, b, g, r, fbp, vinfo, finfo);
     render_e(106+235, y, b, g, r, fbp, vinfo, finfo);
-//    render_w(106+255, y, b, g, r, fbp, vinfo, finfo);
+    render_w(106+255, y, b, g, r, fbp, vinfo, finfo);
 
     render_b(595, y, b, g, r, fbp, vinfo, finfo);
     render_a(620, y, b, g, r, fbp, vinfo, finfo);
