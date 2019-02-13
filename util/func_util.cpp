@@ -1,5 +1,6 @@
 #include "func_util.h"
 #include <cmath>
+#include <algorithm>
 
 using namespace std;
 
@@ -246,4 +247,29 @@ void rasterScan(int x_min, int y_min, int x_max, int y_max, char colorful, char 
             }
         }
     }
+}
+
+bool checkIfIntersect(int x01, int y01, int x02, int y02, int x11, int y11, int x12, int y12){
+    float delta_x0 = (float)(x01 - x02);
+    float delta_x1 = (float)(x11 - x12);
+    float delta_y0 = (float)(y01 - y02);
+    float delta_y1 = (float)(y11 - y12);
+
+    float c = delta_x0 * delta_y1 - delta_x1 * delta_y0;
+
+    if (abs(c) < 0.01){
+        return false;
+    } else {
+        float a = (float) (x01 * y02 - y01 * x02);
+        float b = (float) (x11 * y12 - y11 * x12);
+
+        float x = (a * delta_x1 - b * delta_x0) / c;
+        float y = (a * delta_y1 - b * delta_y0) / c;
+
+        if ((x >= (float)std::min(x11,x12)) && (x <= (float)std::max(x11,x12)) && (y >= (float)std::min(y11,y12)) && (y <= (float)std::max(y11,y12)))
+            if ((x >= (float)std::min(x01,x02)) && (x <= (float)std::max(x01,x02)) && (y >= (float)std::min(y01,y02)) && (y <= (float)std::max(y01,y02)))
+            return true;
+    }
+
+    return false;
 }
