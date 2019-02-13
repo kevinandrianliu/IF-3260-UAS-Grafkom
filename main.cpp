@@ -113,7 +113,7 @@ int main(int argc, char** argv){
         exit(4);
     }
 
-    const char *dev = "/dev/input/event2";
+    const char *dev = "/dev/input/event4";
     int fd = open(dev, O_RDONLY);
     if (fd == -1) {
         fprintf(stderr, "Cannot open %s: %s.\n", dev, strerror(errno));
@@ -139,6 +139,7 @@ int main(int argc, char** argv){
 	int life = 2;
 
     bool plane_shot_flag = false;
+    bool bullet_collision_flag = false;
     int cannonShot = 0;
 	int times;
 	int max_times = 50;
@@ -229,7 +230,27 @@ int main(int argc, char** argv){
 				} else if (plane_bullet_object->getY() > 500) {
 					delete plane_bullet_object;
 					plane_bullet_object = nullptr;
-				}
+				} else {
+                    int i = 0;
+                    while ((i < bullets_vector_list.size())) {
+                        // *** CannonBullet and PlaneBullet collision
+                        if (bullets_vector_list[i]->checkCollision(*plane_bullet_object)){
+
+                            Blast *(blast_object) = new Blast(plane_bullet_object->getX(), plane_bullet_object->getY(), 20);
+                            blast_object->render(fbp,vinfo,finfo);
+
+                            bullets_vector_list.erase(bullets_vector_list.begin() + i - 1);
+                            delete plane_bullet_object;
+                            plane_bullet_object = nullptr;
+
+                            delete blast_object;
+
+                            break;
+                        } else {
+                            i++;
+                        }
+                    }   
+                }
             }
         } else {
             int blast_size = 1;
