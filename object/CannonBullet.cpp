@@ -92,3 +92,75 @@ bool CannonBullet::checkIfShot(class Plane& plane){
     }
     return false;
 };
+bool CannonBullet::checkCollision(class PlaneBullet& bullet)
+{
+    int x = this->getX();
+    int y = this->getY();
+
+    switch (selection){
+        case false:
+            x -= offset/1.5;
+            break;
+        case 1:
+            x -= offset/2;
+            break;
+        case 2:
+            break;
+        case 3:
+            x += offset/2;
+            break;
+        case 4:
+            x += offset/1.5;
+            break;
+        default:
+            break;
+    }
+    y -= offset;
+
+    int bullet_plane_width = bullet.getX();
+    int bullet_plane_height = bullet.getY();
+
+    int x_min_star_box = x - 7;
+    int y_min_star_box = y - 7;
+    int x_max_star_box = x + 7;
+    int y_max_star_box = y + 7;
+
+    int x0_plane_bullet_coordinates[4] = {
+        bullet_plane_width-7,
+        bullet_plane_width,
+        bullet_plane_width+7,
+        bullet_plane_width
+    };
+    int y0_plane_bullet_coordinates[4] = {
+        bullet_plane_height,
+        bullet_plane_height-7,
+        bullet_plane_height,
+        bullet_plane_height+7
+    };
+    int x1_plane_bullet_coordinates[4] = {
+        bullet_plane_width,
+        bullet_plane_width+7,
+        bullet_plane_width,
+        bullet_plane_width-7
+    };
+    int y1_plane_bullet_coordinates[4] = {
+        bullet_plane_height-7,
+        bullet_plane_height,
+        bullet_plane_height+7,
+        bullet_plane_height
+    };
+
+    for (int i = 0; i < 4; i++){
+        if (checkIfIntersect(x_min_star_box,y_min_star_box,x_min_star_box,y_max_star_box,x0_plane_bullet_coordinates[i],y0_plane_bullet_coordinates[i],x1_plane_bullet_coordinates[i],y1_plane_bullet_coordinates[i]))
+            return true;
+        if (checkIfIntersect(x_min_star_box,y_max_star_box,x_max_star_box,y_max_star_box,x0_plane_bullet_coordinates[i],y0_plane_bullet_coordinates[i],x1_plane_bullet_coordinates[i],y1_plane_bullet_coordinates[i]))
+            return true;
+        if (checkIfIntersect(x_max_star_box,y_max_star_box,x_max_star_box,y_min_star_box,x0_plane_bullet_coordinates[i],y0_plane_bullet_coordinates[i],x1_plane_bullet_coordinates[i],y1_plane_bullet_coordinates[i]))
+            return true;
+        if (checkIfIntersect(x_max_star_box,y_min_star_box,x_min_star_box,y_min_star_box,x0_plane_bullet_coordinates[i],y0_plane_bullet_coordinates[i],x1_plane_bullet_coordinates[i],y1_plane_bullet_coordinates[i]))
+            return true;
+    }
+
+    return false;
+};
+

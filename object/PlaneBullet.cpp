@@ -39,6 +39,7 @@ bool PlaneBullet::checkIfCollide(class Cannon& cannon){
     }
     return false;
 };
+
 /*
 int PlaneBullet::equation(class Cannon& cannon, int x){
     int cannon_x_pos = cannon.getX();
