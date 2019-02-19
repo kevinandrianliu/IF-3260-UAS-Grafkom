@@ -44,7 +44,7 @@ class Object {
         void addPoint(Point * p);
         void printPoints();
     private:
-        vector<Point *> *point_vector;
+        vector<Point *> point_vector;
 };
 
 #endif

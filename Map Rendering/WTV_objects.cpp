@@ -39,23 +39,21 @@ void Point::setY(int y){
 }
 
 Object::Object(){
-    this->point_vector = new vector<Point *>();
+    
 };
 
 Object::~Object(){
-    while (point_vector->size() > 0){
-        point_vector->erase(point_vector->begin());
+    while (point_vector.size() > 0){
+        point_vector.erase(point_vector.begin());
     }
-
-    delete(point_vector);
 };
 
 void Object::addPoint(Point * p){
-    point_vector->push_back(p);
+    point_vector.push_back(p);
 }
 
 void Object::printPoints(){
-    for (vector<Point *>::iterator it = point_vector->begin(); it != point_vector->end(); it++){
+    for (vector<Point *>::iterator it = point_vector.begin(); it != point_vector.end(); it++){
         cout << (*it)->getX() << ", " << (*it)->getY() << endl;
     }
 }
