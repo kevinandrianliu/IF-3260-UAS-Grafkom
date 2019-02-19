@@ -62,15 +62,34 @@ void Object::render(char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_sc
     int i = 1;
     struct RGB rgb;
     rgb.r = rgb.b = rgb.g = 255;
-
+	int x_min = 999999;
+	int y_min = 999999;
+	int x_max = -999999;
+	int y_max = -999999;
     while (i < size){
-        int x_min = point_vector[i-1]->getX();
-        int y_min = point_vector[i-1]->getY();
-        int x_max = point_vector[i]->getX();
-        int y_max = point_vector[i]->getY();
+        int x1 = point_vector[i-1]->getX();
+        int y1 = point_vector[i-1]->getY();
+        int x2 = point_vector[i]->getX();
+        int y2 = point_vector[i]->getY();
 
-        bresenham(x_min, y_min, x_max, y_max, rgb, fbp, vinfo, finfo);
+        bresenham(x1, y1, x2, y2, rgb, fbp, vinfo, finfo);
+		if((x1 < x_min)&&(x1 < x2)){x_min = x1;}
+		else if((x2 < x_min)&&(x2 < x1)){x_min = x2;}
+		else {}
+
+		if((y1 < y_min)&&(y1 < y2)){y_min = y1;}
+		else if((y2 < y_min)&&(y2 < y1)){y_min = y2;}
+		else {}
+
+		if((x1 > x_max)&&(x1 > x2)){x_max = x1;}
+		else if((x2 > x_max)&&(x2 > x1)){x_max = x2;}
+		else {}
+
+		if((y1 > y_max)&&(y1 > y2)){y_max = y1;}
+		else if((y2 > y_max)&&(y2 > y1)){y_max = y2;}
+		else {}
 
         i++;
     }
+    rasterScan(x_min, y_min, x_max, y_max, 0, fbp, vinfo, finfo);
 }

@@ -97,7 +97,7 @@ int main(int argc, char** argv){
     rgb.g = 0;
     rgb.b = 0;
 
-    View *view = new View(783,162,1283,662,rgb);
+    View *view = new View(0,0,500,500,rgb);
     vector<Object *> object_vector = read_file();
 
     cout << object_vector.size() << endl;
@@ -106,7 +106,7 @@ int main(int argc, char** argv){
     time.tv_sec = 0;
     time.tv_nsec = 50000000L;
 
-    clear_screen(1366,762,fbp,vinfo,finfo);
+    clear_screen(800,600,fbp,vinfo,finfo);
 
     int i = 0;
 
