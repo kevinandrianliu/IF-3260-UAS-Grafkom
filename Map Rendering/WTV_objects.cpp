@@ -57,3 +57,20 @@ void Object::printPoints(){
         cout << (*it)->getX() << ", " << (*it)->getY() << endl;
     }
 }
+void Object::render(char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo){
+    int size = point_vector.size();
+    int i = 1;
+    struct RGB rgb;
+    rgb.r = rgb.b = rgb.g = 255;
+
+    while (i < size){
+        int x_min = point_vector[i-1]->getX();
+        int y_min = point_vector[i-1]->getY();
+        int x_max = point_vector[i]->getX();
+        int y_max = point_vector[i]->getY();
+
+        bresenham(x_min, y_min, x_max, y_max, rgb, fbp, vinfo, finfo);
+
+        i++;
+    }
+}

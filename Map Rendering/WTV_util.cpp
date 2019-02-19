@@ -2,6 +2,8 @@
 
 #include <cmath>
 #include <algorithm>
+#include <vector>
+#include <iostream>
 
 using namespace std;
 
@@ -37,6 +39,18 @@ void bresenham(int x0, int y0, int x1, int y1, struct RGB rgb, char * framebuffe
 
     // Checks if the points make vertical line
     if ((x1 - x0) == 0){
+        if (y0 > y1){
+            int x_temp;
+            int y_temp;
+
+            x_temp = x0;
+            y_temp = y0;
+            x0 = x1;
+            y0 = y1;
+            x1 = x_temp;
+            y1 = y_temp;
+        }
+
         for (int y = y0; y <= y1; y++){
             long int mem_location = (x1 + vinfo.xoffset) * (vinfo.bits_per_pixel/8) + (y + vinfo.yoffset) * finfo.line_length;
 
@@ -123,4 +137,40 @@ void pixel_color(char *fbp, long int location, int b, int g, int r){
     *(fbp + location + 1) = g;     // green
     *(fbp + location + 2) = r;     // red
     *(fbp + location + 3) = 0;
+}
+
+vector<Object *> read_file(){
+    ifstream fileInput;
+    fileInput.open("./map.txt");
+    int x0, y0;
+    string line;
+    Object *object = nullptr;
+    vector<Object *> object_vector;
+
+    if (fileInput.is_open())
+    {
+        while ( getline (fileInput,line) )
+        {
+            fileInput >> x0 >> y0;
+            //scout << x0;
+            if ((x0 == 9999) && (y0 == 9999)){
+                if (object != nullptr){
+                    object_vector.push_back(object);
+                    object = nullptr;
+                }
+            } else {
+                if (object == nullptr){
+                    object = new Object();
+                }
+                object->addPoint(new Point(x0+50,y0+200));
+            }
+            //cout << line << '\n';
+        }
+        fileInput.close();
+    } else {
+        cout << "Unable to open file";
+    }
+
+    cout << object_vector.size() << endl;
+    return object_vector;
 }

@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <fstream>
+#include <ctime>
 
 #include "WTV_objects.h"
 #include "WTV_util.h"
@@ -91,55 +92,42 @@ int main(int argc, char** argv){
 
     thread inputter (userInput,fd);
 
-    // --- Read map.txt ---
-    ifstream fileInput;
-    fileInput.open("../assets/map.txt");
-    int x0, y0;
-    string line;
-
-    if (fileInput.is_open())
-    {
-        while ( getline (fileInput,line) )
-        {
-            fileInput >> x0 >> y0;
-            //scout << x0;
-            if ((x0 == 9999) && (y0 == 9999)){
-                //cout << "read file\n";
-            }else{
-                //cout << x0 << "," << y0 << endl;    
-            }
-            //cout << line << '\n';
-        }
-        fileInput.close();
-    } else {
-        cout << "Unable to open file";
-    }
-    // --- end of read map.txt ---
-
     struct RGB rgb;
     rgb.r = 255;
     rgb.g = 0;
     rgb.b = 0;
 
     View *view = new View(783,162,1283,662,rgb);
-    Object *object = new Object();
+    vector<Object *> object_vector = read_file();
 
-    object->addPoint(new Point(10,10));
-    object->addPoint(new Point(20,20));
-    object->addPoint(new Point(30,30));
-    
-    object->printPoints();
+    cout << object_vector.size() << endl;
+
+    struct timespec time;
+    time.tv_sec = 0;
+    time.tv_nsec = 50000000L;
 
     clear_screen(1366,762,fbp,vinfo,finfo);
 
-    view->render(fbp,vinfo,finfo);
+    int i = 0;
+
+    for (std::vector<Object *>::iterator it = object_vector.begin(); it != object_vector.end(); it++){
+       (*it)->render(fbp,vinfo,finfo);
+       //(*it)->printPoints();
+       i++;
+       nanosleep(&time,NULL);
+    }
+
+    //view->render(fbp,vinfo,finfo);
 
     while (!(flagShoot));
 
     inputter.join();
 
     delete(view);
-    delete(object);
+
+    while (object_vector.size() > 0){
+        object_vector.erase(object_vector.begin());
+    }
 
     munmap(fbp, screensize);
     close(fbfd);

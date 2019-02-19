@@ -2,9 +2,14 @@
 #define __WTV_OBJECTS_HPP__
 
 #include <vector>
-#include "WTV_util.h"
 
 using namespace std;
+
+struct RGB {
+    char r;
+    char g;
+    char b;
+};
 
 class View {
     public:
@@ -43,6 +48,7 @@ class Object {
 
         void addPoint(Point * p);
         void printPoints();
+        void render(char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo);
     private:
         vector<Point *> point_vector;
 };
