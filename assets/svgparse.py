@@ -8,6 +8,7 @@ doc.unlink()
 file = open("map.txt","w")
 
 for string in path_strings:
+    file.write('9999 9999\n')
     sr = string.replace('m', '')
     sr = sr.replace('z','')
     sr = sr.split('l')
@@ -23,5 +24,4 @@ for string in path_strings:
             print(x,' ',y)
             string2 = str(x)+' '+ str(y) +'\n'
             file.write(string2)
-    file.write('==\n')
 file.close()
