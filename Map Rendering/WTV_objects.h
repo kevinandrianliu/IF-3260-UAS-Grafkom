@@ -57,8 +57,8 @@ class Object {
 
         void addPoint(Point * p);
         void printPoints();
-        void render_to_view(View * view, View * window, View * clip, char * framebuffer, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo);
-        void render(char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo);
+        void render_to_view(View * view, View * window, View * clip, Point * reference, int x_clip_offset, int y_clip_offset, char * framebuffer, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo);
+        void render(View * view, char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo);
     
         vector<Point *> point_vector;
 };

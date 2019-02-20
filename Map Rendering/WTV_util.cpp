@@ -22,7 +22,7 @@ void clear_screen(unsigned int x_size, unsigned int y_size, char * framebuffer, 
     }
 }
 
-void bresenham(int x0, int y0, int x1, int y1, struct RGB rgb, char * framebuffer, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo){
+void bresenham(int x0, int y0, int x1, int y1, View * view, struct RGB rgb, char * framebuffer, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo){
     
     // Swaps the points if first point is on the right of second point
     if (x0 > x1){
@@ -52,7 +52,7 @@ void bresenham(int x0, int y0, int x1, int y1, struct RGB rgb, char * framebuffe
         }
 
         for (int y = y0; y <= y1; y++){
-            pixel_color(x1, y, framebuffer, vinfo, finfo, rgb);
+            pixel_color(x1, y, view, framebuffer, vinfo, finfo, rgb);
         }
     } else {
         float gradien = (y1 - y0)/(x1 - x0);
@@ -65,7 +65,7 @@ void bresenham(int x0, int y0, int x1, int y1, struct RGB rgb, char * framebuffe
                 int dx = x1 - x0;
                 int dy = y1 - y0;
                 for (int x = x0; x <= x1; x++){
-                    pixel_color(x, y, framebuffer, vinfo, finfo, rgb);
+                    pixel_color(x, y, view, framebuffer, vinfo, finfo, rgb);
 
                     eps += dy;
                     if ((eps << 1) >= dx){
@@ -77,7 +77,7 @@ void bresenham(int x0, int y0, int x1, int y1, struct RGB rgb, char * framebuffe
                 int dx = x1 - x0;
                 int dy = y0 - y1;
                 for (int x = x0; x <= x1; x++){
-                    pixel_color(x, y, framebuffer, vinfo, finfo, rgb);
+                    pixel_color(x, y, view, framebuffer, vinfo, finfo, rgb);
 
                     eps += dy;
                     if ((eps << 1) >= dx){
@@ -96,7 +96,7 @@ void bresenham(int x0, int y0, int x1, int y1, struct RGB rgb, char * framebuffe
                 int dy = y1 - y0;
 
                 for (int y = y0; y <= y1; y++){
-                    pixel_color(x, y, framebuffer, vinfo, finfo, rgb);
+                    pixel_color(x, y, view, framebuffer, vinfo, finfo, rgb);
 
                     eps += dx;
                     if ((eps << 1) >= dy){
@@ -109,7 +109,7 @@ void bresenham(int x0, int y0, int x1, int y1, struct RGB rgb, char * framebuffe
                 int dy = y0 - y1;
 
                 for (int y = y0; y >= y1; y--){
-                    pixel_color(x, y, framebuffer, vinfo, finfo, rgb);
+                    pixel_color(x, y, view, framebuffer, vinfo, finfo, rgb);
 
                     eps += dx;
                     if ((eps << 1) >= dy){
@@ -122,13 +122,28 @@ void bresenham(int x0, int y0, int x1, int y1, struct RGB rgb, char * framebuffe
     }
 }
 
-void pixel_color(int x, int y, char *fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo, struct RGB rgb){
-    long int location = (x + vinfo.xoffset) * (vinfo.bits_per_pixel/8) + (y - 1 + vinfo.yoffset) * finfo.line_length;
+void pixel_color(int x, int y, View * view, char *fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo, struct RGB rgb){
+    if (view != nullptr){
+        int x_min = (*view).getXMin();
+        int y_min = (*view).getYMin();
+        int x_max = (*view).getXMax();
+        int y_max = (*view).getYMax();
+        if (x > x_min && x < x_max && y > y_min && y < y_max){
+            long int location = (x + vinfo.xoffset) * (vinfo.bits_per_pixel/8) + (y - 1 + vinfo.yoffset) * finfo.line_length;
 
-    *(fbp + location) = rgb.b;         // blue
-    *(fbp + location + 1) = rgb.g;     // green
-    *(fbp + location + 2) = rgb.r;     // red
-    *(fbp + location + 3) = 0;
+            *(fbp + location) = rgb.b;         // blue
+            *(fbp + location + 1) = rgb.g;     // green
+            *(fbp + location + 2) = rgb.r;     // red
+            *(fbp + location + 3) = 0;
+        }
+    } else {
+        long int location = (x + vinfo.xoffset) * (vinfo.bits_per_pixel/8) + (y - 1 + vinfo.yoffset) * finfo.line_length;
+
+        *(fbp + location) = rgb.b;         // blue
+        *(fbp + location + 1) = rgb.g;     // green
+        *(fbp + location + 2) = rgb.r;     // red
+        *(fbp + location + 3) = 0;
+    }
 }
 
 vector<Object *> read_file(){
@@ -192,36 +207,53 @@ char checkPixelAround(int x, int y, char * fbp, struct fb_var_screeninfo vinfo, 
     return (pixel_up && pixel_down);
 }
 
-// void rasterScan(int x_min, int y_min, int x_max, int y_max, char colorful, char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo){
-// 	char fill_flag = 0;  // 0 = Don't fill, 1 = Fill
-//     long int mem_location;
+void pixel_color2(char fill_flag, int x, int y, View * view, struct RGB rgb, char *fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo){
+    if (view != nullptr){
+        int x_min = (*view).getXMin();
+        int y_min = (*view).getYMin();
+        int x_max = (*view).getXMax();
+        int y_max = (*view).getYMax();
+        if (x > x_min && x < x_max && y > y_min && y < y_max){
+            long int location = (x + vinfo.xoffset) * (vinfo.bits_per_pixel/8) + (y + vinfo.yoffset) * finfo.line_length;
 
-//     // Assumes x is not filled from the top or bottom of screen
-//     for (int j = y_min; j <= y_max; j++){
-//         for (int i = x_min; i <= x_max; i++){
-//             mem_location = (i + vinfo.xoffset) * (vinfo.bits_per_pixel/8) + (j + vinfo.yoffset) * finfo.line_length;
+            if ((*(fbp + location) || *(fbp + location + 1) || *(fbp + location + 2)) == 0x00){
+                if (fill_flag){
+                    *(fbp + location) = rgb.b;         // blue
+                    *(fbp + location + 1) = rgb.g;     // green
+                    *(fbp + location + 2) = rgb.r;     // red
+                    *(fbp + location + 3) = 0;       
+                }
+            } else {
+                if (checkPixelAround(x, y, fbp, vinfo, finfo)){
+                    if (fill_flag) {
+                        *(fbp + location) = rgb.b;         // blue
+                        *(fbp + location + 1) = rgb.g;     // green
+                        *(fbp + location + 2) = rgb.r;     // red
+                        *(fbp + location + 3) = 0;              
+                    }
 
-//             if ((*(fbp + mem_location) || *(fbp + mem_location + 1) || *(fbp + mem_location + 2)) == 0x00){
-//                 if (fill_flag){
-//                     if (colorful){
-//                         pixel_color(fbp,mem_location,(i % 255),(j % 255), ((j-i) % 255));
-//                     } else {
-//                         pixel_color(fbp,mem_location,255,255,255);
-//                     }
-//                 }
-//             } else {
-//                 if (checkPixelAround(i, j, fbp, vinfo, finfo)){
-//                     if (fill_flag) {
-//                         if (colorful){
-//                             pixel_color(fbp,mem_location,(i % 255),(j % 255), ((j-i) % 255));
-//                         } else {
-//                             pixel_color(fbp,mem_location,255,255,255);
-//                         }
-//                     }
+                    fill_flag = !(fill_flag);
+                }
+            }
+        }
+    } else {
+        long int location = (x + vinfo.xoffset) * (vinfo.bits_per_pixel/8) + (y - 1 + vinfo.yoffset) * finfo.line_length;
 
-//                     fill_flag = !(fill_flag);
-//                 }
-//             }
-//         }
-//     }
-// }
+        *(fbp + location) = rgb.b;         // blue
+        *(fbp + location + 1) = rgb.g;     // green
+        *(fbp + location + 2) = rgb.r;     // red
+        *(fbp + location + 3) = 0;
+    }
+}
+
+void rasterScan(int x_min, int y_min, int x_max, int y_max, struct RGB rgb, View * view, char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo){
+	char fill_flag = 0;  // 0 = Don't fill, 1 = Fill
+    long int mem_location;
+
+    // Assumes x is not filled from the top or bottom of screen
+    for (int j = y_min; j <= y_max; j++){
+        for (int i = x_min; i <= x_max; i++){
+            pixel_color2(fill_flag, i, j, view, rgb, fbp, vinfo, finfo);
+        }
+    }
+}

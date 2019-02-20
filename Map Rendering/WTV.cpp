@@ -98,12 +98,17 @@ int main(int argc, char** argv){
 
     View *clip = new View(55,35,505,485,rgb);
     vector<Object *> object_vector = read_file();
+    
+    Point *reference = new Point(555,35);
+
+    int x_clip_offset = 0;
+    int y_clip_offset = 0;
 
     key_press = 0x00;
     clear_screen(1366,762,fbp,vinfo,finfo);
     for (std::vector<Object *>::iterator it = object_vector.begin(); it != object_vector.end(); it++){
-        (*it)->render(fbp,vinfo,finfo);
-        (*it)->render_to_view(view,new View(55,35,505,485,rgb),clip,fbp,vinfo,finfo);
+        (*it)->render(view,fbp,vinfo,finfo);
+        (*it)->render_to_view(view,new View(55,35,505,485,rgb),clip,reference,x_clip_offset,y_clip_offset,fbp,vinfo,finfo);
     }
     view->render(fbp,vinfo,finfo);
     clip->render(fbp,vinfo,finfo);
@@ -116,24 +121,28 @@ int main(int argc, char** argv){
                     if (clip->getXMin() > X_MIN_CLIP){
                         clip->setXMin(clip->getXMin() - 5);
                         clip->setXMax(clip->getXMax() - 5);
+                        x_clip_offset -= 5;
                     }
                     break;
                 case KEY_RIGHT:
                     if (clip->getXMax() < X_MAX_CLIP){
                         clip->setXMin(clip->getXMin() + 5);
                         clip->setXMax(clip->getXMax() + 5);
+                        x_clip_offset += 5;
                     }
                     break;
                 case KEY_UP:
                     if (clip->getYMin() > Y_MIN_CLIP){
                         clip->setYMin(clip->getYMin() - 5);
                         clip->setYMax(clip->getYMax() - 5);
+                        y_clip_offset -= 5;
                     }
                     break;
                 case KEY_DOWN:
                     if (clip->getYMax() < Y_MAX_CLIP){
                         clip->setYMin(clip->getYMin() + 5);
                         clip->setYMax(clip->getYMax() + 5);
+                        y_clip_offset += 5;
                     }
                     break;
                 case KEY_MINUS:
@@ -150,8 +159,8 @@ int main(int argc, char** argv){
                     break;
             }
             for (std::vector<Object *>::iterator it = object_vector.begin(); it != object_vector.end(); it++){
-               (*it)->render(fbp,vinfo,finfo);
-               (*it)->render_to_view(view,new View(55,35,505,485,rgb),clip,fbp,vinfo,finfo);
+               (*it)->render(view,fbp,vinfo,finfo);
+               (*it)->render_to_view(view,new View(55,35,505,485,rgb),clip,reference,x_clip_offset,y_clip_offset,fbp,vinfo,finfo);
             }
             view->render(fbp,vinfo,finfo);
             clip->render(fbp,vinfo,finfo);

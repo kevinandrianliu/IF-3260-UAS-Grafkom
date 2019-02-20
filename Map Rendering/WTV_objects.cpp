@@ -23,10 +23,10 @@ void View::setXMax(int x_max){ this->x_max = x_max; };
 void View::setYMax(int y_max){ this->y_max = y_max; };
 
 void View::render(char * framebuffer, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo){
-    bresenham(x_min, y_min, x_max, y_min, rgb, framebuffer, vinfo, finfo);
-    bresenham(x_max, y_min, x_max, y_max, rgb, framebuffer, vinfo, finfo);
-    bresenham(x_max, y_max, x_min, y_max, rgb, framebuffer, vinfo, finfo);
-    bresenham(x_min, y_min, x_min, y_max, rgb, framebuffer, vinfo, finfo);
+    bresenham(x_min, y_min, x_max, y_min, nullptr, rgb, framebuffer, vinfo, finfo);
+    bresenham(x_max, y_min, x_max, y_max, nullptr, rgb, framebuffer, vinfo, finfo);
+    bresenham(x_max, y_max, x_min, y_max, nullptr, rgb, framebuffer, vinfo, finfo);
+    bresenham(x_min, y_min, x_min, y_max, nullptr, rgb, framebuffer, vinfo, finfo);
 };
 
 Point::Point(int x, int y){
@@ -67,8 +67,14 @@ void Object::printPoints(){
     }
 };
 
-void Object::render_to_view(View * view, View * window, View * clip, char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo){
+void Object::render_to_view(View * view, View * window, View * clip, Point * reference, int x_clip_offset, int y_clip_offset, char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo){
     int x_offset = (*view).getXMin() - (*window).getXMin();
+
+    int moved_point_x = reference->getX() * ((*view).getXMax() - (*view).getXMin()) / ((*clip).getXMax() - (*clip).getXMin());
+    int moved_point_y = reference->getY() * ((*view).getXMax() - (*view).getXMin()) / ((*clip).getXMax() - (*clip).getXMin());
+
+    int x_correction = abs(moved_point_x - (*view).getXMin());
+    int y_correction = abs(moved_point_y - (*view).getYMin());
 
     int size = point_vector.size();
     int i = 1;
@@ -79,12 +85,12 @@ void Object::render_to_view(View * view, View * window, View * clip, char * fbp,
     int x_max = -999999;
     int y_max = -999999;
     while (i < size){
-        int x1 = point_vector[i-1]->getX() * ((*view).getXMax() - (*view).getXMin()) / ((*clip).getXMax() - (*clip).getXMin()) + x_offset;
-        int y1 = point_vector[i-1]->getY() * ((*view).getXMax() - (*view).getXMin()) / ((*clip).getXMax() - (*clip).getXMin());
-        int x2 = point_vector[i]->getX() * ((*view).getXMax() - (*view).getXMin()) / ((*clip).getXMax() - (*clip).getXMin()) + x_offset;
-        int y2 = point_vector[i]->getY() * ((*view).getXMax() - (*view).getXMin()) / ((*clip).getXMax() - (*clip).getXMin());
+        int x1 = point_vector[i-1]->getX() * ((*view).getXMax() - (*view).getXMin()) / ((*clip).getXMax() - (*clip).getXMin()) + x_offset - y_correction*1.5 - x_clip_offset * ((*view).getYMax() - (*view).getYMin()) / ((*clip).getYMax() - (*clip).getYMin()) * 1.05;
+        int y1 = point_vector[i-1]->getY() * ((*view).getXMax() - (*view).getXMin()) / ((*clip).getXMax() - (*clip).getXMin()) - y_correction - y_clip_offset * ((*view).getYMax() - (*view).getYMin()) / ((*clip).getYMax() - (*clip).getYMin());
+        int x2 = point_vector[i]->getX() * ((*view).getXMax() - (*view).getXMin()) / ((*clip).getXMax() - (*clip).getXMin()) + x_offset - y_correction*1.5 - x_clip_offset * ((*view).getYMax() - (*view).getYMin()) / ((*clip).getYMax() - (*clip).getYMin()) * 1.05;
+        int y2 = point_vector[i]->getY() * ((*view).getXMax() - (*view).getXMin()) / ((*clip).getXMax() - (*clip).getXMin()) - y_correction - y_clip_offset * ((*view).getYMax() - (*view).getYMin()) / ((*clip).getYMax() - (*clip).getYMin());
 
-        bresenham(x1, y1, x2, y2, rgb, fbp, vinfo, finfo);
+        bresenham(x1, y1, x2, y2, view, rgb, fbp, vinfo, finfo);
         if((x1 < x_min)&&(x1 < x2)){x_min = x1;}
         else if((x2 < x_min)&&(x2 < x1)){x_min = x2;}
         else {}
@@ -103,10 +109,10 @@ void Object::render_to_view(View * view, View * window, View * clip, char * fbp,
 
         i++;
     }
-    // rasterScan(x_min, y_min, x_max, y_max, 0, fbp, vinfo, finfo);
+    //rasterScan(x_min, y_min, x_max, y_max, rgb, view, fbp, vinfo, finfo);
 };
 
-void Object::render(char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo){
+void Object::render(View * view, char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo){
     int size = point_vector.size();
     int i = 1;
     struct RGB rgb;
@@ -121,7 +127,7 @@ void Object::render(char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_sc
         int x2 = point_vector[i]->getX();
         int y2 = point_vector[i]->getY();
 
-        bresenham(x1, y1, x2, y2, rgb, fbp, vinfo, finfo);
+        bresenham(x1, y1, x2, y2, nullptr, rgb, fbp, vinfo, finfo);
 		if((x1 < x_min)&&(x1 < x2)){x_min = x1;}
 		else if((x2 < x_min)&&(x2 < x1)){x_min = x2;}
 		else {}
@@ -140,5 +146,5 @@ void Object::render(char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_sc
 
         i++;
     }
-    // rasterScan(x_min, y_min, x_max, y_max, 0, fbp, vinfo, finfo);
+    //rasterScan(x_min, y_min, x_max, y_max, rgb, view, fbp, vinfo, finfo);
 };
