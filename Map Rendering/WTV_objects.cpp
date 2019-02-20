@@ -103,7 +103,7 @@ void Object::render_to_view(View * view, View * window, View * clip, char * fbp,
 
         i++;
     }
-    rasterScan(x_min, y_min, x_max, y_max, 0, fbp, vinfo, finfo);
+    // rasterScan(x_min, y_min, x_max, y_max, 0, fbp, vinfo, finfo);
 };
 
 void Object::render(char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_screeninfo finfo){
@@ -140,5 +140,5 @@ void Object::render(char * fbp, struct fb_var_screeninfo vinfo, struct fb_fix_sc
 
         i++;
     }
-    rasterScan(x_min, y_min, x_max, y_max, 0, fbp, vinfo, finfo);
+    // rasterScan(x_min, y_min, x_max, y_max, 0, fbp, vinfo, finfo);
 };
