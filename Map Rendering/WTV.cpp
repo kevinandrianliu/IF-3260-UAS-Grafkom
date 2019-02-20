@@ -17,8 +17,12 @@
 
 using namespace std;
 
-bool flagShoot = false;
-char turret_selection = 2;
+#define X_MIN_CLIP 55
+#define Y_MIN_CLIP 35
+#define X_MAX_CLIP 505
+#define Y_MAX_CLIP 485
+
+char key_press = 0x00;
 
 void userInput(int fd){
     ssize_t n;
@@ -35,16 +39,10 @@ void userInput(int fd){
             errno = EIO;
             break;
         }
-        if (ev.type == EV_KEY && ev.value >= 0 && ev.value <= 2){
-            if ((ev.value == 1) && (!(flagShoot))){
-                if ((ev.code  == KEY_LEFT) && (turret_selection > 0)){
-                    turret_selection--;
-                } else if ((ev.code == KEY_RIGHT) && (turret_selection < 4)){
-                    turret_selection++;
-                } else if ((ev.code == KEY_Z)) {
-                    flagShoot = true;
-                    break;
-                }
+        if (ev.type == EV_KEY && ev.value == 1){
+            key_press = ev.code;
+            if (ev.code == KEY_ESC){
+                break;
             }
         }
     }
@@ -96,34 +94,75 @@ int main(int argc, char** argv){
     rgb.r = 255;
     rgb.g = 0;
     rgb.b = 0;
+    View *view = new View(555,35,1235,715,rgb);     // 70, 45, 410, 470 Jangan dihapus
 
-    View *view = new View(0,0,500,500,rgb);
+    View *clip = new View(55,35,505,485,rgb);
     vector<Object *> object_vector = read_file();
 
-    cout << object_vector.size() << endl;
-
-    struct timespec time;
-    time.tv_sec = 0;
-    time.tv_nsec = 50000000L;
-
-    clear_screen(800,600,fbp,vinfo,finfo);
-
-    int i = 0;
-
+    key_press = 0x00;
+    clear_screen(1366,762,fbp,vinfo,finfo);
     for (std::vector<Object *>::iterator it = object_vector.begin(); it != object_vector.end(); it++){
-       (*it)->render(fbp,vinfo,finfo);
-       //(*it)->printPoints();
-       i++;
-       nanosleep(&time,NULL);
+        (*it)->render(fbp,vinfo,finfo);
+        (*it)->render_to_view(view,new View(55,35,505,485,rgb),clip,fbp,vinfo,finfo);
     }
+    view->render(fbp,vinfo,finfo);
+    clip->render(fbp,vinfo,finfo);
 
-    //view->render(fbp,vinfo,finfo);
-
-    while (!(flagShoot));
+    while (key_press != KEY_ESC){
+        if (key_press != 0x00){
+            clear_screen(1366,762,fbp,vinfo,finfo);
+            switch (key_press){
+                case KEY_LEFT:
+                    if (clip->getXMin() > X_MIN_CLIP){
+                        clip->setXMin(clip->getXMin() - 5);
+                        clip->setXMax(clip->getXMax() - 5);
+                    }
+                    break;
+                case KEY_RIGHT:
+                    if (clip->getXMax() < X_MAX_CLIP){
+                        clip->setXMin(clip->getXMin() + 5);
+                        clip->setXMax(clip->getXMax() + 5);
+                    }
+                    break;
+                case KEY_UP:
+                    if (clip->getYMin() > Y_MIN_CLIP){
+                        clip->setYMin(clip->getYMin() - 5);
+                        clip->setYMax(clip->getYMax() - 5);
+                    }
+                    break;
+                case KEY_DOWN:
+                    if (clip->getYMax() < Y_MAX_CLIP){
+                        clip->setYMin(clip->getYMin() + 5);
+                        clip->setYMax(clip->getYMax() + 5);
+                    }
+                    break;
+                case KEY_MINUS:
+                    if (clip->getXMax() - clip->getXMin() > 50){
+                        clip->setXMax(clip->getXMax() - 5);
+                        clip->setYMax(clip->getYMax() - 5);
+                    }
+                    break;
+                case KEY_EQUAL:
+                    if (clip->getXMax() < X_MAX_CLIP){
+                        clip->setXMax(clip->getXMax() + 5);
+                        clip->setYMax(clip->getYMax() + 5);
+                    }
+                    break;
+            }
+            for (std::vector<Object *>::iterator it = object_vector.begin(); it != object_vector.end(); it++){
+               (*it)->render(fbp,vinfo,finfo);
+               (*it)->render_to_view(view,new View(55,35,505,485,rgb),clip,fbp,vinfo,finfo);
+            }
+            view->render(fbp,vinfo,finfo);
+            clip->render(fbp,vinfo,finfo);
+            key_press = 0x00;
+        }
+    }
 
     inputter.join();
 
     delete(view);
+    delete(clip);
 
     while (object_vector.size() > 0){
         object_vector.erase(object_vector.begin());
