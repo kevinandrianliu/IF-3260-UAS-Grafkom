@@ -146,9 +146,9 @@ void pixel_color(int x, int y, View * view, char *fbp, struct fb_var_screeninfo 
     }
 }
 
-vector<Object *> read_file(){
+vector<Object *> read_file(char* filename){
     ifstream fileInput;
-    fileInput.open("./map.txt");
+    fileInput.open(filename);
     int x0, y0;
     string line;
     Object *object = nullptr;

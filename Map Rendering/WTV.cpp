@@ -23,10 +23,15 @@ using namespace std;
 #define Y_MAX_CLIP 485
 
 char key_press = 0x00;
+bool draw_trees = false;
+bool draw_roads = true;
+bool draw_buildings = true;
 
 void userInput(int fd){
     ssize_t n;
     struct input_event ev;
+
+    bool out = false;
 
     while(1){
         n = read(fd, &ev, sizeof ev);
@@ -40,10 +45,25 @@ void userInput(int fd){
             break;
         }
         if (ev.type == EV_KEY && ev.value == 1){
-            key_press = ev.code;
-            if (ev.code == KEY_ESC){
-                break;
+            switch (ev.code){
+                case KEY_ESC:
+                    out = true;
+                    break;
+                case KEY_1:
+                    draw_buildings = !draw_buildings;
+                    break;
+                case KEY_2:
+                    draw_roads = !draw_roads;
+                    break;
+                case KEY_3:
+                    draw_trees = !draw_trees;
+                    break;
             }
+            key_press = ev.code;
+        }
+
+        if (out){
+            break;
         }
     }
 }
@@ -97,8 +117,10 @@ int main(int argc, char** argv){
     View *view = new View(555,35,1235,715,rgb);     // 70, 45, 410, 470 Jangan dihapus
 
     View *clip = new View(55,35,505,485,rgb);
-    vector<Object *> object_vector = read_file();
-    
+    vector<Object *> building_vector = read_file((char *) "map-building.txt");
+    vector<Object *> tree_vector = read_file((char *) "map-tree.txt");
+    vector<Object *> road_vector = read_file((char *) "map-road.txt");
+
     Point *reference = new Point(555,35);
 
     int x_clip_offset = 0;
@@ -106,10 +128,25 @@ int main(int argc, char** argv){
 
     key_press = 0x00;
     clear_screen(1366,762,fbp,vinfo,finfo);
-    for (std::vector<Object *>::iterator it = object_vector.begin(); it != object_vector.end(); it++){
-        (*it)->render(view,fbp,vinfo,finfo);
-        (*it)->render_to_view(view,new View(55,35,505,485,rgb),clip,reference,x_clip_offset,y_clip_offset,fbp,vinfo,finfo);
+    if (draw_buildings){
+        for (std::vector<Object *>::iterator it = building_vector.begin(); it != building_vector.end(); it++){
+            (*it)->render(view,fbp,vinfo,finfo);
+            (*it)->render_to_view(view,new View(55,35,505,485,rgb),clip,reference,x_clip_offset,y_clip_offset,fbp,vinfo,finfo);
+        }
     }
+    if (draw_roads){
+        for (std::vector<Object *>::iterator it = tree_vector.begin(); it != tree_vector.end(); it++){
+            (*it)->render(view,fbp,vinfo,finfo);
+            (*it)->render_to_view(view,new View(55,35,505,485,rgb),clip,reference,x_clip_offset,y_clip_offset,fbp,vinfo,finfo);
+        }
+    }
+    if (draw_trees){
+        for (std::vector<Object *>::iterator it = road_vector.begin(); it != road_vector.end(); it++){
+            (*it)->render(view,fbp,vinfo,finfo);
+            (*it)->render_to_view(view,new View(55,35,505,485,rgb),clip,reference,x_clip_offset,y_clip_offset,fbp,vinfo,finfo);
+        }
+    }
+    
     view->render(fbp,vinfo,finfo);
     clip->render(fbp,vinfo,finfo);
 
@@ -158,9 +195,23 @@ int main(int argc, char** argv){
                     }
                     break;
             }
-            for (std::vector<Object *>::iterator it = object_vector.begin(); it != object_vector.end(); it++){
-               (*it)->render(view,fbp,vinfo,finfo);
-               (*it)->render_to_view(view,new View(55,35,505,485,rgb),clip,reference,x_clip_offset,y_clip_offset,fbp,vinfo,finfo);
+            if (draw_buildings){
+                for (std::vector<Object *>::iterator it = building_vector.begin(); it != building_vector.end(); it++){
+                    (*it)->render(view,fbp,vinfo,finfo);
+                    (*it)->render_to_view(view,new View(55,35,505,485,rgb),clip,reference,x_clip_offset,y_clip_offset,fbp,vinfo,finfo);
+                }
+            }
+            if (draw_roads){
+                for (std::vector<Object *>::iterator it = tree_vector.begin(); it != tree_vector.end(); it++){
+                    (*it)->render(view,fbp,vinfo,finfo);
+                    (*it)->render_to_view(view,new View(55,35,505,485,rgb),clip,reference,x_clip_offset,y_clip_offset,fbp,vinfo,finfo);
+                }
+            }
+            if (draw_trees){
+                for (std::vector<Object *>::iterator it = road_vector.begin(); it != road_vector.end(); it++){
+                    (*it)->render(view,fbp,vinfo,finfo);
+                    (*it)->render_to_view(view,new View(55,35,505,485,rgb),clip,reference,x_clip_offset,y_clip_offset,fbp,vinfo,finfo);
+                }
             }
             view->render(fbp,vinfo,finfo);
             clip->render(fbp,vinfo,finfo);
@@ -173,8 +224,8 @@ int main(int argc, char** argv){
     delete(view);
     delete(clip);
 
-    while (object_vector.size() > 0){
-        object_vector.erase(object_vector.begin());
+    while (building_vector.size() > 0){
+        building_vector.erase(building_vector.begin());
     }
 
     munmap(fbp, screensize);
